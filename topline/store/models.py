@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 
 class Category(models.Model):
@@ -40,3 +41,23 @@ class Product(models.Model):
         ordering = ['-created_at']
         verbose_name = 'product'
         verbose_name_plural = 'products'
+
+
+class Banner(models.Model):
+    name = models.CharField(max_length=255, verbose_name='Название', db_index=True)
+    slug = models.SlugField(max_length=255, unique=True, verbose_name='URL', db_index=True)
+    description = models.TextField(verbose_name='Описание')
+    images = models.ImageField(upload_to='img_banner/%Y/%m/%d', verbose_name='Изображение')
+    link = models.URLField(max_length=255, verbose_name='Ссылка')
+    is_active = models.BooleanField(default=False, verbose_name='Активность')
+    created_at = models.DateTimeField('Создана', auto_now_add=True)
+    updated_at = models.DateTimeField('Отредактирована', auto_now=True)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    class Meta:
+        db_table = "banners"
+        ordering = ["name", "slug"]
+        verbose_name = 'banner'
+        verbose_name_plural = 'banners'
