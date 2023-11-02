@@ -23,7 +23,7 @@ load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-DEBUG = True if os.getenv('DEBUG') == 'True' else False
+DEBUG = os.getenv('DEBUG', True)
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django.contrib.sites',
     'store.apps.StoreConfig',
 ]
 
@@ -76,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'preferences.context_processors.preferences_cp',
             ],
         },
     },
