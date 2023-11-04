@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ title }}</title>
+</head>
+<body>
+{% if carts %}
+{% for cart in carts %}
+<h1>{{ cart.user.username }}</h1>
+<table class="table table-striped">
+    <tr>
+        <th>Название</th>
+        <th>Изображение</th>
+        <th>Количество</th>
+        <th>Цена</th>
+        <th>Общая стоимость</th>
+    </tr>
+    <tr>
+        <td>{{ cart.product.name }}</td>
+        <td><img src="{{ cart.product.photos.url }}" width="120" alt=""/></td>
+        <td>
+            <a href="{% url 'cart:cart_add' cart.product.slug  %}">
+                <i>+</i>
+            </a>
+            {{ cart.quantity }}
+            <a href="{% url 'cart:cart_del' cart.id %}">
+                <i>-</i>
+            </a>
+        </td>
+        <td>{{ cart.product.price }} руб.</td>
+        <td>{{ cart.sum }} руб.</td>
+    </tr>
+    <a href="{% url 'cart:cart_delete' cart.id %}">
+        <button>Удалить</button>
+    </a>
+</table>
+{% endfor %}
+{% else %}
+Ваша корзина пуста
+<a href="{% url 'store:index' %}">Назад к покупкам</a>
+{% endif %}
+<div>
+    Итого: {{ total_summ}}
+    всего кол-во: {{ total_quantity }}
+</div>
+<div>
+    <a href="{% url 'cart:cart_clear' %}">
+        <button type="button" class="btn btn-primary">Очистить корзину</button>
+    </a>
+</div>
+</body>
+</html>
