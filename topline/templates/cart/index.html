@@ -47,6 +47,10 @@
     Итого: {{ total_summ}}
     всего кол-во: {{ total_quantity }}
 </div>
-
+<div>
+    <a href="{% url 'cart:cart_clear' %}">
+        <button type="button" class="btn btn-primary">Очистить корзину</button>
+    </a>
+</div>
 </body>
 </html>

@@ -14,7 +14,6 @@ def add_product_to_cart(request: Request, slug: Product, quantity: int = 1) -> H
     """
     Добавление товара в корзину
 
-    :param add:
     :param quantity:
     :param request:
     :param slug:
@@ -62,6 +61,7 @@ def del_product_is_cart(request: Request, _id: Cart, quantity: int = 1) -> HttpR
 # @require_POST
 def delete_product_from_cart(request: Request, _id: Cart) -> HttpResponseRedirect:
     """
+    Удаление продукта из корзины
 
     :param request:
     :param _id:
@@ -74,7 +74,24 @@ def delete_product_from_cart(request: Request, _id: Cart) -> HttpResponseRedirec
     return HttpResponseRedirect(current_page)
 
 
+def clear_cart(request: Request) -> HttpResponseRedirect:
+    """
+    Очистка корзины от всех продуктов
+
+    :param request:
+    :return:
+    """
+    current_page = request.META.get('HTTP_REFERER')
+    user = request.user
+    carts = Cart.objects.filter(user=user)
+    carts.all().delete()
+    return HttpResponseRedirect(current_page)
+
+
 class CartViewList(generic.ListView):
+    """
+    Отображение списка корзины
+    """
     model = Cart
     context_object_name = 'carts'
     template_name = 'cart/index.html'
