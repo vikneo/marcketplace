@@ -14,6 +14,9 @@ class Cart(models.Model):
     def __str__(self):
         return f'Корзина {self.user} | Продукт {self.product}'
 
+    def sum(self):
+        return self.quantity * self.product.price
+
     class Meta:
         db_table = 'cart'
         verbose_name = 'корзина'
