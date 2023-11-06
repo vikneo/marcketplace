@@ -1,12 +1,25 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-from django.conf import settings
-import os
 
 from .models import Category, Product, Banner
 
 
+class ProductAdminInline(admin.TabularInline):
+    model = Product
+    extra = 0
+
+
+class ProductAdminStaked(admin.StackedInline):
+    model = Product
+    extra = 0
+
+
 class BannerAdmin(admin.ModelAdmin):
+
+    inlines = [
+        ProductAdminInline,
+        ProductAdminStaked
+    ]
 
     list_display = ['name', 'slug', 'get_html_images', 'is_active']
     list_filter = ['is_active', ]
@@ -20,13 +33,13 @@ class BannerAdmin(admin.ModelAdmin):
         В панели администратора,
         ссылка на изображение отображается в виде картинки размером 60х 60.
         """
-        if obj.images:
-            return mark_safe(f"<img src'{obj.images.url}' width=50")
+        print(obj.products_banners.first())
+        if obj.products_banners.first().photos:
+            return mark_safe(f'<img src="{obj.products_banners.first().photos.url}" width="60">')
         else:
             return 'not url'
 
     get_html_images.short_description = "Изображение"
-    get_html_images.allow_tags = True
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -38,6 +51,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class ProductAdmin(admin.ModelAdmin):
+
     list_display = ['category', 'name', 'get_html_photo', 'price', 'available', 'created_at', 'updated_at']
     list_display_links = ['name', 'category']
     list_filter = ['category', 'available', ]
@@ -54,5 +68,6 @@ class ProductAdmin(admin.ModelAdmin):
     get_html_photo.allow_tags = True
 
 
+admin.site.register(Banner, BannerAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Product, ProductAdmin)

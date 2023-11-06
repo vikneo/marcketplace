@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <div>
+        <form action="{% url 'store:settings' %}" method="post" >
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Очистить весь кеш">
+            <input type="submit" value="Очистить кеш Баннера">
+            <input type="submit" value="Очистить кеш Корзины">
+        </form>
+    </div>
+{{ block.super }}
+{% endblock %}
