@@ -1,6 +1,10 @@
+from typing import Any
+
+from django.contrib.auth.models import User
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.views import generic
 from django.views.decorators.http import require_POST, require_GET
 from requests import Request
@@ -9,8 +13,12 @@ from .models import Cart
 from store.models import Product
 
 
-@require_GET
-def add_product_to_cart(request: Request, slug: Product, quantity: int = 1) -> HttpResponseRedirect:
+def get_object_cart(request: Request, _id: Cart):
+    carts = Cart.objects.filter(user=request.user, id=_id)
+    return carts
+
+
+def add_product_to_cart(request: Request, slug: Product, quantity: int = 1) -> HttpResponse:
     """
     Добавление товара в корзину
 
@@ -29,12 +37,13 @@ def add_product_to_cart(request: Request, slug: Product, quantity: int = 1) -> H
         return HttpResponseRedirect(current_page)
     else:
         cart = carts.first()
-        cart.quantity += quantity
-        cart.save()
-        return HttpResponseRedirect(current_page)
+        if 1 <= cart.quantity < 21:
+            cart.quantity += quantity
+            cart.save()
+    return HttpResponseRedirect(current_page)
 
 
-def del_product_is_cart(request: Request, _id: Cart, quantity: int = 1) -> HttpResponseRedirect:
+def take_product_is_cart(request: Request, _id: Cart, quantity: int = 1) -> HttpResponseRedirect:
     """
     Добавление товара в корзину
 
@@ -43,19 +52,14 @@ def del_product_is_cart(request: Request, _id: Cart, quantity: int = 1) -> HttpR
     :param request:
     :return:
     """
-    current_page = request.META.get('HTTP_REFERER')
-    user = request.user
-    carts = Cart.objects.filter(user=user, id=_id)
+    cart = get_object_cart(request, _id).first()
 
-    cart = carts.first()
-    if 1 < cart.quantity < 21:
+    if 1 < cart.quantity <= 21:
         cart.quantity -= quantity
-        cart.save()
-        return HttpResponseRedirect(current_page)
     else:
         cart.quantity = quantity
-        cart.save()
-        return HttpResponseRedirect(current_page)
+    cart.save()
+    return redirect('cart:index')
 
 
 # @require_POST
@@ -67,11 +71,9 @@ def delete_product_from_cart(request: Request, _id: Cart) -> HttpResponseRedirec
     :param _id:
     :return:
     """
-    current_page = request.META.get('HTTP_REFERER')
-    user = request.user
-    cart = Cart.objects.filter(user=user, id=_id)
+    cart = get_object_cart(request, _id)
     cart.delete()
-    return HttpResponseRedirect(current_page)
+    return redirect('cart:index')
 
 
 def clear_cart(request: Request) -> HttpResponseRedirect:
@@ -81,11 +83,9 @@ def clear_cart(request: Request) -> HttpResponseRedirect:
     :param request:
     :return:
     """
-    current_page = request.META.get('HTTP_REFERER')
-    user = request.user
-    carts = Cart.objects.filter(user=user)
+    carts = Cart.objects.filter(user=request.user)
     carts.all().delete()
-    return HttpResponseRedirect(current_page)
+    return redirect('cart:index')
 
 
 class CartViewList(generic.ListView):

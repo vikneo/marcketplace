@@ -19,5 +19,6 @@ class Cart(models.Model):
 
     class Meta:
         db_table = 'cart'
+        ordering = ['-created_at']
         verbose_name = 'корзина'
         verbose_name_plural = 'корзины'
