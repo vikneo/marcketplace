@@ -1,63 +1,78 @@
-from urllib.request import Request
+from decimal import Decimal
+from django.conf import settings
 
-from django.http import HttpResponseRedirect, HttpResponse
-
-from cart.models import Cart
 from store.models import Product
 
 
+MAX_COUNT = 21
+
+
 class CartView(object):
+    def __init__(self, request):
+        self.session = request.session
+        cart = self.session.get(settings.CART_ID)
+        if not cart:
+            cart = self.session[settings.CART_ID] = {}
+        self.cart = cart
 
-    def __init__(self, request: Request):
-        self.cart = Cart.objects
-        self.quantity = 1
-        self.user = request.user
-        self.request = request
-        self.current_page = request.META.get('HTTP_REFERER')
+    def __check_product_to_cart(self,product: Product):
+        product_id = str(product.id)
+        if product_id in self.cart:
+            return product_id
 
-    def add(self, slug: Product, quantity: int = 1) -> HttpResponse:
-        """
-        Добавление товара в корзину
+    def add_product(self, product: Product, quantity: int = 1, update=False):
+        product_id = str(product.id)
+        if product_id not in self.cart:
+            self.cart[product_id] = {'quantity': 0, 'price': str(product.price)}
+        if update:
+            self.cart[product_id]['quantity'] = quantity
+        else:
+            self.cart[product_id]['quantity'] += quantity
+        self.save()
 
-        :param quantity:
-        :param slug:
-        :return:
-        """
-        self.cart.filter(user=self.user, product=slug)
-        if not self.cart.exists():
-            Cart.objects.create(user=self.user, product=slug, quantity=quantity)
+    def add(self, product: Product, quantity: int = 1):
+        product_id = self.__check_product_to_cart(product)
+        if 1 <= self.cart[product_id]['quantity'] < MAX_COUNT:
+            self.cart[product_id]['quantity'] += quantity
+        self.save()
 
-    def counting_products(self):
-        cart = self.cart.first()
-        if 1 <= cart.quantity <= 21:
-            if self.plus_product:
-                cart.quantity += self.quantity
-            elif self.minus_product:
-                cart.quantity -= self.quantity
-            cart.save()
+    def take(self, product: Product, quantity: int = 1):
+        product_id = self.__check_product_to_cart(product)
+        if 1 < self.cart[product_id]['quantity'] <= MAX_COUNT:
+            self.cart[product_id]['quantity'] -= quantity
+        self.save()
 
-    def plus_product(self):
-        cart = self.cart.first()
-        if 1 <= cart.quantity <= 21:
-            cart.quantity += self.quantity
-            cart.save()
+    def save(self):
+        self.session.modified = True
+        print(self.cart.keys())
 
-    def minus_product(self, slug: Product):
-        cart = self.cart.first()
-        if 1 <= cart.quantity < 21:
-            cart.quantity += self.quantity
-            cart.save()
-#
-# current_page = request.META.get('HTTP_REFERER')
-# user = request.user
-# carts = Cart.objects.filter(user=user, id=_id)
-#
-# cart = carts.first()
-# if 1 < cart.quantity < 21:
-#     cart.quantity -= quantity
-#     cart.save()
-#     return HttpResponseRedirect(current_page)
-# else:
-#     cart.quantity = quantity
-#     cart.save()
-#     return HttpResponseRedirect(current_page)
+    def remove(self, product: Product):
+        product_id = str(product.id)
+        if product_id in self.cart:
+            del self.cart[product_id]
+            self.save()
+
+    def __len__(self):
+        return sum(item['quantity'] for item in self.cart.values())
+
+    def __iter__(self):
+        product_id = self.cart.keys()
+        products = Product.objects.filter(id__in=product_id)
+
+        cart = self.cart.copy()
+        for product in products:
+            cart[str(product.id)]['product'] = product
+        for item in cart.values():
+            item['price'] = Decimal(item['price'])
+            item['total_price'] = item['price'] * item['quantity']
+            yield item
+
+    def get_total_price(self):
+        return sum(
+            Decimal(item['price']) * item['quantity']
+            for item in self.cart.values()
+        )
+
+    def clear(self):
+        del self.session[settings.CART_ID]
+        self.save()
