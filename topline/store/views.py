@@ -17,6 +17,7 @@ class SettingsView(generic.ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(
-            title="Settings"
+            title="Settings",
+            has_permission=True,
         )
         return context

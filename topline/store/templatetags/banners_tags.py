@@ -1,6 +1,6 @@
 from random import choices
 
-from django.core.cache import caches
+from django.core.cache import cache
 from django import template
 
 from ..models import Banner
@@ -13,6 +13,6 @@ def banner_main_page() -> dict:
     """
     Caching of random three banners is created.
     """
-    banners = caches.get_or_set('banners', choices(Banner.objects.all(), k=3))
+    banners = cache.get_or_set('banners', choices(Banner.objects.all(), k=3))
 
     return {'banners': banners}
