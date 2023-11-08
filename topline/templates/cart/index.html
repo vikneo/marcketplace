@@ -9,8 +9,6 @@
 </head>
 <body>
 {% if carts %}
-{% for cart in carts %}
-<h1>{{ cart.user.username }}</h1>
 <table class="table table-striped">
     <tr>
         <th>Название</th>
@@ -19,33 +17,37 @@
         <th>Цена</th>
         <th>Общая стоимость</th>
     </tr>
+    {% for item in carts %}
+    {% with cart=item.product %}
     <tr>
-        <td>{{ cart.product.name }}</td>
-        <td><img src="{{ cart.product.photos.url }}" width="120" alt=""/></td>
+        <td>{{ cart.name }}</td>
+        <td><img src="{{ cart.photos.url }}" width="120" alt=""/></td>
         <td>
-            <a href="{% url 'cart:cart_add' cart.product.slug  %}">
+            <a href="{% url 'cart:cart_add' cart.slug  %}">
                 <i>+</i>
             </a>
-            {{ cart.quantity }}
-            <a href="{% url 'cart:cart_del' cart.id %}">
+            {{ item.quantity }}
+            <a href="{% url 'cart:cart_take' cart.slug %}">
                 <i>-</i>
             </a>
         </td>
-        <td>{{ cart.product.price }} руб.</td>
-        <td>{{ cart.sum }} руб.</td>
+        <td>{{ cart.price }} руб.</td>
+        <td>{{ item.total_price }} руб.</td>
+        <a href="{% url 'cart:cart_delete' cart.slug %}">
+            <button>Удалить</button>
+        </a>
     </tr>
-    <a href="{% url 'cart:cart_delete' cart.id %}">
-        <button>Удалить</button>
-    </a>
+    {% endwith %}
+    {% endfor %}
 </table>
-{% endfor %}
+`
 {% else %}
 Ваша корзина пуста
 <a href="{% url 'store:index' %}">Назад к покупкам</a>
 {% endif %}
 <div>
-    Итого: {{ total_summ}}
-    всего кол-во: {{ total_quantity }}
+    <b> Итого: </b>{{ cart.get_total_price }} руб.
+    <b>Всего кол-во: </b>{{ cart|length }} шт.
 </div>
 <div>
     <a href="{% url 'cart:cart_clear' %}">

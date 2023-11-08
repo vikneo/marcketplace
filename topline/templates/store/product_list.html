@@ -5,7 +5,23 @@
     <title>Title</title>
 </head>
 <body>
-<div>Welcome <b>{{ user }}</b></div>
+<div>
+    Welcome <b>{{ user }}</b>
+<!--    Отображение корзины в Хидере-->
+    <div class="cart">
+        {% with total_items=cart|length %}
+        {% if cart|length > 0 %}
+        Корзина:
+        <a href="{% url 'cart:index' %}">
+            {{ total_items }} шт.
+            {{ cart.get_total_price }} руб.
+        </a>
+        {% else %}
+        Корзина пуста
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
 <table class="table table-striped">
     <tr>
         <th>Title</th>
@@ -16,7 +32,7 @@
         <td>{{ product.name }}</td>
         <td><img src="{{ product.photos.url }}" width="120" alt=""/></td>
     </tr>
-    <a href="{% url 'cart:cart_add' product.slug %}">
+    <a href="{% url 'cart:cart_add_product' product.slug %}">
         <button type="button" class="btn btn-primary">Добавить в корзину</button>
     </a>
     {% endfor %}
