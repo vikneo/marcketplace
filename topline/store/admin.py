@@ -4,22 +4,12 @@ from django.utils.safestring import mark_safe
 from .models import Category, Product, Banner
 
 
-class ProductAdminInline(admin.TabularInline):
-    model = Product
-    extra = 0
-
-
-class ProductAdminStaked(admin.StackedInline):
-    model = Product
+class BannerAdminInline(admin.TabularInline):
+    model = Banner
     extra = 0
 
 
 class BannerAdmin(admin.ModelAdmin):
-
-    inlines = [
-        ProductAdminInline,
-        ProductAdminStaked
-    ]
 
     list_display = ['name', 'slug', 'get_html_images', 'is_active']
     list_filter = ['is_active', ]
@@ -33,9 +23,8 @@ class BannerAdmin(admin.ModelAdmin):
         В панели администратора,
         ссылка на изображение отображается в виде картинки размером 60х 60.
         """
-        print(obj.products_banners.first())
-        if obj.products_banners.first().photos:
-            return mark_safe(f'<img src="{obj.products_banners.first().photos.url}" width="60">')
+        if obj.product.first():
+            return mark_safe(f'<img src="{obj.product.first().photos.url}" alt=""width="60">')
         else:
             return 'not url'
 

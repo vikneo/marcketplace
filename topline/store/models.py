@@ -29,7 +29,6 @@ class Product(models.Model):
     available = models.BooleanField(default=False, verbose_name='Доступность')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата изменения')
-    banner = models.ForeignKey("Banner", on_delete=models.CASCADE, verbose_name='Баннер', related_name="products_banners")
 
     def __str__(self) -> str:
         return f'{self.name}'
@@ -46,6 +45,7 @@ class Product(models.Model):
 
 class Banner(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название', db_index=True)
+    product = models.ManyToManyField(Product, verbose_name='Баннер', related_name="products_banners")
     slug = models.SlugField(max_length=255, unique=True, verbose_name='URL', db_index=True)
     description = models.TextField(verbose_name='Описание')
     link = models.URLField(max_length=255, verbose_name='Ссылка', blank=True)
