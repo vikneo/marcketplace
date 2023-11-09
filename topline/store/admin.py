@@ -1,11 +1,15 @@
 from django.contrib import admin
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.urls import path, reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.views.generic import DetailView
 
 from .models import Category, Product, Banner
 
 
-class BannerAdminInline(admin.TabularInline):
-    model = Banner
+class ProductAdminInline(admin.StackedInline):
+    model = Product
     extra = 0
 
 
@@ -32,11 +36,21 @@ class BannerAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
+
+    inlines = [
+        ProductAdminInline,
+    ]
     list_display = ['name', 'slug', 'is_active']
     list_filter = ['is_active', ]
     search_fields = ['name', ]
     prepopulated_fields = {'slug': ('name', )}
     list_editable = ['is_active', ]
+
+
+class OrderDetailView(PermissionRequiredMixin, DetailView):
+    model = 'Order'
+    permission_required = "products.view_order"
+    template_name = 'store/order_detail.html'
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -54,7 +68,27 @@ class ProductAdmin(admin.ModelAdmin):
             return mark_safe(f'<img src="{obj.photos.url}" width="60" alt="{obj.name}">')
 
     get_html_photo.short_description = 'Изображение'
-    get_html_photo.allow_tags = True
+
+
+class OrderAdmin(admin.ModelAdmin):
+    pass
+    # TODO добавить модель Заказы (Orders)
+    # list_display = ['detail']
+    #
+    # def get_urls(self):
+    #     url = super().get_urls()
+    #     new_url = [
+    #         path(
+    #           "<slug:slug>/detail/", self.admin_site.admin_view(ProductDetailView.as_view()), name="product_detail"
+    #         ),
+    #     ]
+    #     return new_url + url
+    #
+    # def detail(self, obj: Product):
+    #     url = reverse('admin:product_detail', args=[obj.slug])
+    #     return format_html(f'<a href="{url}">{obj.name}</a>')
+    #
+    # detail.short_description = 'Детали'
 
 
 admin.site.register(Banner, BannerAdmin)

@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 
 
 class Category(models.Model):
@@ -55,6 +56,10 @@ class Banner(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name}"
+
+    def save(self, *args, **kwargs):
+        self.name = slugify(self.name)
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = "banners"
