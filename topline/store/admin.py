@@ -23,8 +23,8 @@ class BannerAdmin(admin.ModelAdmin):
         В панели администратора,
         ссылка на изображение отображается в виде картинки размером 60х 60.
         """
-        if obj.product.first():
-            return mark_safe(f'<img src="{obj.product.first().photos.url}" alt=""width="60">')
+        if obj.product:
+            return mark_safe(f'<img src="{obj.product.photos.url}" alt=""width="60">')
         else:
             return 'not url'
 

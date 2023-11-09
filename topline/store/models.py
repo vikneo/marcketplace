@@ -45,7 +45,7 @@ class Product(models.Model):
 
 class Banner(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название', db_index=True)
-    product = models.ManyToManyField(Product, verbose_name='Баннер', related_name="products_banners")
+    product = models.OneToOneField(Product, on_delete=models.CASCADE, verbose_name='Продукт')
     slug = models.SlugField(max_length=255, unique=True, verbose_name='URL', db_index=True)
     description = models.TextField(verbose_name='Описание')
     link = models.URLField(max_length=255, verbose_name='Ссылка', blank=True)

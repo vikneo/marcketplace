@@ -3,11 +3,9 @@
 {% for banner in banners %}
     {% if banner.is_active %}
         <div class="container_slider_css">
-            {% for image in banner.product.all %}
             <a href="{{ banner.link }}">
-                <img class="photo_slider_css" src="{{ image.photos.url }}" alt="Product Banner">
+                <img class="photo_slider_css" src="{{ banner.product.photos.url }}" width="200" alt="{{ banner.name }}">
             </a>
-            {% endfor %}
         </div>
     {% else %}
         <p>Здесь могла быть ваша реклама!</p> # TODO for mode Development. Insert an ad image
