@@ -39,7 +39,7 @@
         {% block usertools %}
         {% if has_permission %}
         <div id="user-tools">
-          <a href="{% url 'store:settings' %}">Настройки</a>
+            <a href="{% url 'store:settings' %}">Настройки</a>
             {% block welcome-msg %}
                 {% translate 'Привет,' %}
                 <strong>{% firstof user.get_short_name user.get_username %}</strong>.

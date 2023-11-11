@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>{{ title }}</title>
 </head>
 <body>
 <div>
@@ -32,7 +32,7 @@
     {% for product in products %}
     <tr>
         <td>{{ product.name }}</td>
-        <td><img src="{{ product.photos.url }}" width="120" alt=""/></td>
+        <td><img src="{{ product.photos.url }}" width="120" alt=""></td>
     </tr>
     <a href="{% url 'cart:cart_add_product' product.slug %}">
         <button type="button" class="btn btn-primary">Добавить в корзину</button>
