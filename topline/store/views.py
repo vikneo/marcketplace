@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views import generic
 
-from .forms import SiteNameForm
+from .forms import SiteNameForm, CacheSettingForm
 from .mixins import ChangeListMixin
 from .models import Product
 from .configs import settings
@@ -90,6 +90,25 @@ class ClearCacheCart(ChangeListMixin, generic.TemplateView):
         return HttpResponseRedirect(reverse_lazy("store:settings"))
 
 
+class ClearCacheProductDetail(ChangeListMixin, generic.TemplateView):
+    """
+
+    """
+    template_name = 'admin/settings.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        cache.delete("cart")
+        messages.success(self.request, 'Кеш продукта очищен.')
+        change_list = self.get_change_list_admin(title="Settings")
+        return dict(list(context.items()) + list(change_list.items()))
+
+    def dispatch(self, request, *args, **kwargs):
+        if cache:
+            super().dispatch(request, *args, **kwargs)
+        return HttpResponseRedirect(reverse_lazy("store:settings"))
+
+
 class SiteName(ChangeListMixin, generic.TemplateView):
     """
     Класс SiteName позволяет задать новое название интернет магазина
@@ -101,27 +120,86 @@ class SiteName(ChangeListMixin, generic.TemplateView):
         messages.success(self.request, 'Название магазина успешно изменено')
         change_list = self.get_change_list_admin(
             title="site name",
-            form=SiteNameForm()
         )
         return dict(list(context.items()) + list(change_list.items()))
 
-    # TODO: написать проверку формы для Названия магазина, на сайте в настройках админки.
-    #  ==> Стилизовать страницу настроек
-
-    def dispatch(self, request, *args, **kwargs):
-        if cache:
-            super().dispatch(request, *args, **kwargs)
-        return HttpResponseRedirect(reverse_lazy("store:settings"))
-
-
-# TODO: функция заглушка для объявления названия магазина (времянка)
-def site_name(request):
-    if request.method == 'POST':
-        form = SiteNameForm(request.POST)
-        if form.is_valid():
-            settings.set_site_name(form.cleaned_data['title_site'])
+    def post(self, request):
+        title_site = request.POST.get('title_site')
+        if title_site:
+            settings.set_site_name(title_site)
+            messages.success(self.request, 'Название магазина успешно изменено')
         else:
-            form = SiteNameForm()
-    return render(
-        request, 'admin/settings.html', {'form': form}
-    )
+            messages.error(self.request, 'Поле не должно быть пустым')
+        return HttpResponseRedirect(reverse_lazy('store:settings'))
+
+
+class CacheSetupBannerView(ChangeListMixin, generic.TemplateView):
+    """
+    Класс CacheSetupBannerView позволяет задать или обновить время кеширования Баннера
+    """
+    template_name = 'admin/settings.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        messages.success(self.request, 'Название магазина успешно изменено')
+        change_list = self.get_change_list_admin(
+            title="site name",
+        )
+        return dict(list(context.items()) + list(change_list.items()))
+
+    def post(self, request):
+        cache_time_banner = request.POST.get('cache_time_banner')
+        if cache_time_banner:
+            settings.set_cache_banner(cache_time_banner)
+            messages.success(self.request, 'Время кеширование Баннера установлено')
+        else:
+            messages.error(self.request, 'Поле не должно быть пустым')
+        return HttpResponseRedirect(reverse_lazy('store:settings'))
+    
+
+class CacheSetupCartView(ChangeListMixin, generic.TemplateView):
+    """
+    Класс CacheSetupCartView позволяет задать или обновить время кеширования Корзины
+    """
+    template_name = 'admin/settings.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        messages.success(self.request, 'Название магазина успешно изменено')
+        change_list = self.get_change_list_admin(
+            title="site name",
+        )
+        return dict(list(context.items()) + list(change_list.items()))
+
+    def post(self, request):
+        cache_time_cart = request.POST.get('cache_time_cart')
+        if cache_time_cart:
+            settings.set_cache_cart(cache_time_cart)
+            messages.success(self.request, 'Время кеширование Корзины установлено')
+        else:
+            messages.error(self.request, 'Поле не должно быть пустым')
+        return HttpResponseRedirect(reverse_lazy('store:settings'))
+
+
+class CacheSetupBProdDetailView(ChangeListMixin, generic.TemplateView):
+    """
+    Класс CacheSetupBProdDetailView позволяет задать или обновить время кеширования детальной информации продукта
+    """
+    template_name = 'admin/settings.html'
+
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        messages.success(self.request, 'Название магазина успешно изменено')
+        change_list = self.get_change_list_admin(
+            title="site name",
+        )
+        return dict(list(context.items()) + list(change_list.items()))
+
+    def post(self, request):
+        cache_time_prod_detail = request.POST.get('cache_time_prod_detail')
+        if cache_time_prod_detail:
+            settings.set_cache_product_detail(cache_time_prod_detail)
+            messages.success(self.request, 'Время кеширование детализации продукта установлено')
+        else:
+            messages.error(self.request, 'Поле не должно быть пустым')
+        return HttpResponseRedirect(reverse_lazy('store:settings'))

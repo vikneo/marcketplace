@@ -1,16 +1,18 @@
+{% load static %}
 {% load banners_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{% static 'style/css/admin.css' %}">
+    <title>{{ title_site }}</title>
 </head>
 <body>
 <div>
     Welcome <b>{{ user }}</b>
 <!--    Отображение корзины в Хидере-->
-    <div class="cart">
+    <div class="container">
         {% with total_items=cart|length %}
         {% if cart|length > 0 %}
         Корзина:
@@ -22,9 +24,12 @@
         Корзина пуста
         {% endif %}
         {% endwith %}
+        {% if user.is_superuser %}
+        <p><a href="{% url 'store:settings' %}">Settings</a></p>
+        {% endif %}
     </div>
 </div>
-<table class="table table-striped">
+<table class="flex">
     <tr>
         <th>Title</th>
         <th>Image</th>

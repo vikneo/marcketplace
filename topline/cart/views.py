@@ -14,7 +14,8 @@ class CartListView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         context.update(
             {
-                'carts': CartView(self.request)
+                'carts': CartView(self.request),
+                'title': 'Корзина'
             }
         )
         return context
